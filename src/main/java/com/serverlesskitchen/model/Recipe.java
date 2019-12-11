@@ -21,6 +21,11 @@ public class Recipe {
   @JsonProperty("ingredientsList")
   private List<Ingredients> ingredientsList;
 
+  public Recipe() {
+
+  }
+
+
   public int getId() {
     return id;
   }

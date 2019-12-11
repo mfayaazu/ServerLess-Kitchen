@@ -10,6 +10,9 @@ public class Ingredients {
   private String name;
   private int quantity;
 
+  public Ingredients(String sugar, int i) {
+  }
+
   public String getName() {
     return name;
   }
