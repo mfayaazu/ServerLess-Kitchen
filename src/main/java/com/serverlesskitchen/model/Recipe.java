@@ -1,60 +1,72 @@
 package com.serverlesskitchen.model;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(schema = "serverless_kitchen", name = "Recipes")
+import javax.annotation.Generated;
+import java.util.List;
+
+
+
+@Document(collection="Recipe")
 public class Recipe {
+  @Transient
+  public static final String SEQUENCE_NAME = "users_sequence";
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
   private int id;
   private String name;
   private String instructions;
-  @JsonProperty("ingredientsList")
   private List<Ingredients> ingredientsList;
 
-  public Recipe() {
-
+  public Recipe(int id, String name, String instructions, List<Ingredients> ingredientsList) {
+    this.id = id;
+    this.name = name;
+    this.instructions = instructions;
+    this.ingredientsList = ingredientsList;
   }
-
 
   public int getId() {
     return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
   }
 
   public String getName() {
     return name;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getInstructions() {
     return instructions;
-  }
-
-  public void setInstructions(String instructions) {
-    this.instructions = instructions;
   }
 
   public List<Ingredients> getIngredientsList() {
     return ingredientsList;
   }
 
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setInstructions(String instructions) {
+    this.instructions = instructions;
+  }
+
   public void setIngredientsList(List<Ingredients> ingredientsList) {
     this.ingredientsList = ingredientsList;
+  }
+
+  @Override
+  public String toString() {
+    return "Recipe{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", instructions='" + instructions + '\'' +
+            ", ingredientsList=" + ingredientsList +
+            '}';
   }
 }

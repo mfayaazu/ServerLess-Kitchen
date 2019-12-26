@@ -1,16 +1,16 @@
 package com.serverlesskitchen.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
-@Entity
-@Table(schema = "serverless_kitchen", name = "ingredents")
+
+
 public class Ingredients {
 
   private String name;
   private int quantity;
 
-  public Ingredients(String sugar, int i) {
+  public Ingredients(String name, int quantity) {
+    this.name = name;
+    this.quantity = quantity;
   }
 
   public String getName() {
@@ -27,5 +27,13 @@ public class Ingredients {
 
   public void setQuantity(int quantity) {
     this.quantity = quantity;
+  }
+
+  @Override
+  public String toString() {
+    return "Ingredients{" +
+            "name='" + name + '\'' +
+            ", quantity=" + quantity +
+            '}';
   }
 }

@@ -1,9 +1,6 @@
 package com.serverlesskitchen.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.serverlesskitchen.model.Recipe;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-@Repository
-public interface KitchenRepository extends JpaRepository {
-
-}
+public interface KitchenRepository extends MongoRepository<Recipe, Integer> {}
