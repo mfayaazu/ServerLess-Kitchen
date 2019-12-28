@@ -1,8 +1,6 @@
 package com.serverlesskitchen.model;
 
 
-
-
 public class Ingredients {
 
   private String name;
@@ -33,7 +31,6 @@ public class Ingredients {
   public String toString() {
     return "Ingredients{" +
             "name='" + name + '\'' +
-            ", quantity=" + quantity +
             '}';
   }
 }
