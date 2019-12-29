@@ -2,31 +2,20 @@ package com.serverlesskitchen.model;
 
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.util.List;
-
-
 
 @Document(collection="Recipe")
 public class Recipe {
 
   @Id
-  private int id;
+  private int kitchenId;
   private String name;
   private String instructions;
-  private List<Ingredients> ingredientsList;
+  private List<Ingredients> ingredients;
 
-  public Recipe(int id, String name, String instructions, List<Ingredients> ingredientsList) {
-    this.id = id;
-    this.name = name;
-    this.instructions = instructions;
-    this.ingredientsList = ingredientsList;
-  }
-
-  public int getId() {
-    return id;
+  public int getKitchenId() {
+    return kitchenId;
   }
 
   public String getName() {
@@ -37,12 +26,12 @@ public class Recipe {
     return instructions;
   }
 
-  public List<Ingredients> getIngredientsList() {
-    return ingredientsList;
+  public List<Ingredients> getIngredients() {
+    return ingredients;
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public void setKitchenId(int kitchenId) {
+    this.kitchenId = kitchenId;
   }
 
   public void setName(String name) {
@@ -53,17 +42,17 @@ public class Recipe {
     this.instructions = instructions;
   }
 
-  public void setIngredientsList(List<Ingredients> ingredientsList) {
-    this.ingredientsList = ingredientsList;
+  public void setIngredients(List<Ingredients> ingredients) {
+    this.ingredients = ingredients;
   }
 
   @Override
   public String toString() {
     return "Recipe{" +
-            "id=" + id +
+            "id=" + kitchenId +
             ", name='" + name + '\'' +
             ", instructions='" + instructions + '\'' +
-            ", ingredientsList=" + ingredientsList +
+            ", ingredientsList=" + ingredients +
             '}';
   }
 }
