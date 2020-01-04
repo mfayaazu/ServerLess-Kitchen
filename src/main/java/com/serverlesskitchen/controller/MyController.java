@@ -1,11 +1,15 @@
 package com.serverlesskitchen.controller;
 
+import com.serverlesskitchen.model.Ingredients;
 import com.serverlesskitchen.model.Inventory;
 import com.serverlesskitchen.model.Recipe;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.serverlesskitchen.model.RecipeCount;
 import com.serverlesskitchen.repository.InventoryRepository;
 import com.serverlesskitchen.repository.KitchenRepository;
 import com.serverlesskitchen.repository.SequenceRepository;
@@ -35,7 +39,6 @@ public class MyController {
     @Autowired
     private RecipeService recipeService;
 
-    @CrossOrigin(origins = "http://localhost:8080")
     @GetMapping("/ping")
     public String ping() {
         return "pong";
@@ -45,7 +48,7 @@ public class MyController {
     public String saveRecipe(@RequestBody Recipe recipe) {
         recipe.setKitchenId(nextSequenceService.getNextSequence("CustomSequences"));
         repository.save(recipe);
-            return "Added recipe with ID: " + recipe.getKitchenId();
+        return "Added recipe with ID: " + recipe.getKitchenId();
     }
 
     @GetMapping("/recipes")
@@ -55,7 +58,7 @@ public class MyController {
 
     @GetMapping("/recipes/{id}")
     public Optional<Recipe> getRecipeById(@PathVariable int id) {
-            return repository.findById(id);
+        return repository.findById(id);
     }
 
     @DeleteMapping("/clear")
@@ -81,42 +84,78 @@ public class MyController {
     public String fillInventory(@RequestBody Inventory inventory) {
         int requestedQuantity = inventory.getQuantity();
         int existingQuantity;
-        int finalQuantity=0;
+        int finalQuantity = 0;
         if (inventory.getQuantity() > 0) {
             existingQuantity = findExistingQuantity(inventory.getName());
             if (status == true) {
                 finalQuantity = existingQuantity + requestedQuantity;
                 inventory.setQuantity(finalQuantity);
             } else {
-              finalQuantity= inventory.getQuantity();
-              inventory.setQuantity(inventory.getQuantity());
+                finalQuantity = inventory.getQuantity();
+                inventory.setQuantity(inventory.getQuantity());
             }
             inventoryRepository.save(inventory);
             return "Inventory filled with " + inventory.getName() + "Quantity :" + finalQuantity;
-        }
-        else {
+        } else {
             return "Invalid Quantity";
         }
     }
 
-    public int findExistingQuantity(String name){
+    public int findExistingQuantity(String name) {
         try {
-            Optional<Inventory> getQuantity = inventoryRepository.findById(name);
-            int quantity = getQuantity.get().getQuantity();
-            status= true;
+            Optional<Inventory> existingQuantity = inventoryRepository.findById(name);
+            int quantity = existingQuantity.get().getQuantity();
+            status = true;
             return quantity;
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
-            status=false;
+            status = false;
             return 0;
         }
     }
-
 
     @PatchMapping("/recipes/{id}")
     public ResponseEntity<String> updateExistingRecipe(@RequestBody Recipe recipe, @PathVariable("id") int id) {
         recipeService.update(id, recipe.getName());
         return ResponseEntity.ok("updated");
 
+    }
+
+    @GetMapping("/recipes/get-count-by-recipe")
+    public List<RecipeCount> getCountByRecipe() {
+        int counter;
+        int reduceQuantity;
+        int finalCounter = 0;
+        RecipeCount recipeCounter = new RecipeCount();
+        List<Recipe> fetchAllRecipe = repository.findAll();
+        List<RecipeCount> recipeMessage = new ArrayList<>();
+        for (Recipe i : fetchAllRecipe) {
+            recipeCounter.setId(i.getKitchenId());
+            for (Ingredients ingredients : i.getIngredients()
+            ) {
+                counter = 0;
+                List<Inventory> inventoryList = inventoryRepository.findAll();
+                for (Inventory j : inventoryList
+                ) {
+                    reduceQuantity = j.getQuantity();
+                    while ((ingredients.getName().equals(j.getName())) && (reduceQuantity >= ingredients.getQuantity())) {
+                        reduceQuantity = j.getQuantity() - ingredients.getQuantity();
+                        j.setQuantity(reduceQuantity);
+                        counter++;
+                        System.out.println("Counter: " + counter);
+                    }
+                    finalCounter = counter;
+                    System.out.println("Ingredient Name: " + ingredients.getName());
+                    System.out.println("Final Counter: " + finalCounter);
+                }
+                if (finalCounter > counter) {
+                    recipeCounter.setCount(counter);
+                } else {
+                    recipeCounter.setCount(finalCounter);
+                }
+            }
+            recipeMessage.add(recipeCounter);
+        }
+        return recipeMessage;
     }
 }

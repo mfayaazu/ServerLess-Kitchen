@@ -1,6 +1,8 @@
 package com.serverlesskitchen.model;
 
 
+import java.util.Objects;
+
 public class Ingredients {
 
   private String name;
@@ -31,6 +33,21 @@ public class Ingredients {
   public String toString() {
     return "Ingredients{" +
             "name='" + name + '\'' +
+            ", quantity=" + quantity +
             '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Ingredients)) return false;
+    Ingredients that = (Ingredients) o;
+    return getQuantity() == that.getQuantity() &&
+            getName().equals(that.getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getName(), getQuantity());
   }
 }
