@@ -1,15 +1,6 @@
 package com.serverlesskitchen.controller;
 
-import com.serverlesskitchen.model.Ingredients;
-import com.serverlesskitchen.model.Inventory;
-import com.serverlesskitchen.model.Recipe;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import com.serverlesskitchen.model.RecipeCount;
+import com.serverlesskitchen.model.*;
 import com.serverlesskitchen.repository.InventoryRepository;
 import com.serverlesskitchen.repository.KitchenRepository;
 import com.serverlesskitchen.repository.SequenceRepository;
@@ -21,6 +12,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
@@ -101,18 +96,6 @@ public class MyController {
         }
     }
 
-    public int findExistingQuantity(String name) {
-        try {
-            Optional<Inventory> existingQuantity = inventoryRepository.findById(name);
-            int quantity = existingQuantity.get().getQuantity();
-            status = true;
-            return quantity;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            status = false;
-            return 0;
-        }
-    }
 
     @PatchMapping("/recipes/{id}")
     public ResponseEntity<String> updateExistingRecipe(@RequestBody Recipe recipe, @PathVariable("id") int id) {
@@ -123,14 +106,39 @@ public class MyController {
 
     @GetMapping("/recipes/get-count-by-recipe")
     public List<RecipeCount> getCountByRecipe() {
+        return countNumberOfRecipeToMake();
+    }
+
+    @GetMapping("/recipes/optimize-total-waste")
+    public List<Wastage> calculateWastage() {
+        int recipeCountValue;
+        int finalCountValue = 0;
+        List<Wastage> wastageList = new ArrayList<>();
+        Wastage wastageObj = new Wastage();
+        List<RecipeCount> fetchedCountList = countNumberOfRecipeToMake();
+        for (RecipeCount recipeCount : fetchedCountList
+        ) {
+            recipeCountValue = recipeCount.getCount();
+            finalCountValue = recipeCountValue + finalCountValue;
+        }
+        wastageObj.setRecipes(fetchedCountList);
+        wastageObj.setRecipeCount(finalCountValue);
+        wastageObj.setUnusedInventoryCount(10);
+        wastageList.add(wastageObj);
+        return wastageList;
+    }
+
+    public List<RecipeCount> countNumberOfRecipeToMake() {
         int counter;
         int reduceQuantity;
         int finalCounter = 0;
-        RecipeCount recipeCounter = new RecipeCount();
+
         List<Recipe> fetchAllRecipe = repository.findAll();
         List<RecipeCount> recipeMessage = new ArrayList<>();
         for (Recipe i : fetchAllRecipe) {
+            RecipeCount recipeCounter = new RecipeCount();
             recipeCounter.setId(i.getKitchenId());
+            System.out.println(i.getKitchenId());
             for (Ingredients ingredients : i.getIngredients()
             ) {
                 counter = 0;
@@ -157,5 +165,16 @@ public class MyController {
             recipeMessage.add(recipeCounter);
         }
         return recipeMessage;
+    }
+
+    public int findExistingQuantity(String name) {
+        try {
+            Optional<Inventory> existingQuantity = inventoryRepository.findById(name);
+            int quantity = existingQuantity.get().getQuantity();
+            return quantity;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return 0;
+        }
     }
 }
