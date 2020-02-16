@@ -106,7 +106,8 @@ public class MyController {
 
     @GetMapping("/recipes/get-count-by-recipe")
     public List<RecipeCount> getCountByRecipe() {
-        return countNumberOfRecipeToMake();
+        Wastage wastagearg = new Wastage();
+        return countNumberOfRecipeToMake(wastagearg);
     }
 
     @GetMapping("/recipes/optimize-total-waste")
@@ -115,7 +116,7 @@ public class MyController {
         int finalCountValue = 0;
         List<Wastage> wastageList = new ArrayList<>();
         Wastage wastageObj = new Wastage();
-        List<RecipeCount> fetchedCountList = countNumberOfRecipeToMake();
+        List<RecipeCount> fetchedCountList = countNumberOfRecipeToMake(wastageObj);
         for (RecipeCount recipeCount : fetchedCountList
         ) {
             recipeCountValue = recipeCount.getCount();
@@ -123,23 +124,22 @@ public class MyController {
         }
         wastageObj.setRecipes(fetchedCountList);
         wastageObj.setRecipeCount(finalCountValue);
-        wastageObj.setUnusedInventoryCount(10);
-        // TODO: 2020-01-05
+        wastageObj.getUnusedInventoryCount();
         wastageList.add(wastageObj);
         return wastageList;
     }
 
-    public List<RecipeCount> countNumberOfRecipeToMake() {
+    public List<RecipeCount> countNumberOfRecipeToMake(Wastage wastage) {
         int counter;
         int reduceQuantity;
         int finalCounter = 0;
-
+        int unusedQuantityLeft = 0;
+        int wastageQuantity = 0;
         List<Recipe> fetchAllRecipe = repository.findAll();
         List<RecipeCount> recipeMessage = new ArrayList<>();
         for (Recipe i : fetchAllRecipe) {
             RecipeCount recipeCounter = new RecipeCount();
             recipeCounter.setId(i.getKitchenId());
-            System.out.println(i.getKitchenId());
             for (Ingredients ingredients : i.getIngredients()
             ) {
                 counter = 0;
@@ -150,23 +150,27 @@ public class MyController {
                     while ((ingredients.getName().equals(j.getName())) && (reduceQuantity >= ingredients.getQuantity())) {
                         reduceQuantity = j.getQuantity() - ingredients.getQuantity();
                         j.setQuantity(reduceQuantity);
+                        wastageQuantity = reduceQuantity;
                         counter++;
-                        System.out.println("Counter: " + counter);
                     }
-                    finalCounter = counter;
-                    System.out.println("Ingredient Name: " + ingredients.getName());
-                    System.out.println("Final Counter: " + finalCounter);
+                    if (finalCounter == 0) {
+                        finalCounter = counter;
+                    }
                 }
+                unusedQuantityLeft = wastageQuantity + unusedQuantityLeft;
                 if (finalCounter > counter) {
                     recipeCounter.setCount(counter);
                 } else {
                     recipeCounter.setCount(finalCounter);
                 }
             }
+            wastage.setUnusedInventoryCount(unusedQuantityLeft);
             recipeMessage.add(recipeCounter);
+            finalCounter = 0;
         }
         return recipeMessage;
     }
+
 
     public int findExistingQuantity(String name) {
         try {
